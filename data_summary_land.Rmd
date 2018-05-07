@@ -7,16 +7,42 @@ output: html_document
 library(foreign)
 library(dplyr)
 land <- read.dbf("C:/Users/akell/Desktop/Spring_2018/Research/GIS/land_locations.dbf")
-unique(land$animal)
-print(paste("There are 83 unique individuals in the 'Land' subset (all points, all months)")
-```
-```{r}
 ows <- subset(land, land$month > 6 & land$month < 11)
+
+#all land
+unique(land$animal)
+print(paste("There are 83 unique individuals recorded using land (all months, all years)"))
+unique((land$year))
+```
+
+If all months are included, we have "land" data for all years 2004-2016
+
+```{r}
 unique(ows$animal)
 print(paste("There are 83 unique individuals in the 'ows' subset (months 7-10)"))
 unique(ows$year)
 ```
-Years represented: 2005,2006,2008,2009,2011,2012,2013,2014,2015
-Years absent: 2004,2007,2010
+Open Water Season (OWS): Years absent=2007, 2010, 2016
+
+```{r}
+print(paste("All Land Points by Animal"))
+table(land$animal, land$year)
+```
+```{r}
+print(paste("OWS Land Points by Animal"))
+table(ows$animal, ows$year)
+```
+
+```{r}
+print(paste("Number of fixes, land v. OWS"))
+nrow(land)
+nrow(ows)
+```
+```{r}
+#Test for duplicated data
+tt<-paste(land$animal, land$datetime)
+table(duplicated(tt, fromLast=F)) #Test if you have duplicated data
+print(paste("No data points are duplicated"))
+```
 
 
