@@ -25,9 +25,6 @@ str(land)
 
 write.csv(land, file = "Land.csv")
 
-# Test to see whether error in adehabitat is beacuse of negative numbers
-land_trial <- mutate(land, x_new=X+300000, y_new=Y+300000)
-
 
 ### Individuals per year ###
 
@@ -37,5 +34,13 @@ table(land$animal, land$year)
 tt<-paste(land$animal, land$datetime)
 table(duplicated(tt, fromLast=F)) #Test if you have duplicated data
 
-traj<-as.ltraj(xy=land_trial[,"X":"Y"], date=land_trial$datetime, id=as.character(land_trial$animal))
+traj<-as.ltraj(xy=land[,c("X","Y")], date=land$datetime, id=as.character(land$animal))
 traj2<-ld(traj)
+
+mean(traj2$dt, na.rm=T) #dt=time interval between successive relocations
+traj2_hrs <- mutate(traj2, dt_hrs=dt/3600)
+
+mean(traj2_hrs$dt_hrs, na.rm = T)
+median(traj2_hrs$dt_hrs,  na.rm = T)
+
+tapply(traj2_hrs$dt_hrs, traj2$id, mean, na.rm=T)
