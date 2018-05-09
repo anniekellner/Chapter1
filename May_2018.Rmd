@@ -1,0 +1,81 @@
+---
+title: "May 2018"
+author: "Annie Kellner"
+date: "May 8, 2018"
+output: html_document
+---
+```{r echo=FALSE} 
+rm(list = ls())
+land <- read.csv("Land.csv")
+```
+#All land
+
+83 unique individuals use land from 2004-2016. If all months are included, all years are represented.  
+
+Number of data points per animal, per year (all months included):
+
+```{r echo=FALSE} 
+table(land$animal, land$year)
+```
+
+#Open Water Season, defined as July - October
+Years without data: 2007, 2010, 2016
+
+```{r echo=FALSE}
+ows <- subset(land, land$month > 6 & land$month < 11)
+table(ows$animal, ows$year)
+```
+
+Questions:   
+* How little data is too little? e.g., 14 points? 15 points? Should these be deleted or included?  
+* Should I divide by year for easier analysis?
+
+Total number data points 'all land'| Total number data points 'OWS'
+-----------------------------------|------------------------------
+`r nrow(land)`                     | `r nrow(ows)`  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

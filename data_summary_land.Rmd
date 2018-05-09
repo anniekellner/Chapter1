@@ -10,10 +10,6 @@ land <- read.dbf("C:/Users/akell/Desktop/Spring_2018/Research/GIS/land_locations
 ows <- subset(land, land$month > 6 & land$month < 11)
 ```
 
-There are 'r unique(land$animal)'
-
-
-
 #all land
 
 print(paste("There are 83 unique individuals recorded using land (all months, all years)"))
