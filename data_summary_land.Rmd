@@ -8,9 +8,14 @@ library(foreign)
 library(dplyr)
 land <- read.dbf("C:/Users/akell/Desktop/Spring_2018/Research/GIS/land_locations.dbf")
 ows <- subset(land, land$month > 6 & land$month < 11)
+```
+
+There are 'r unique(land$animal)'
+
+
 
 #all land
-unique(land$animal)
+
 print(paste("There are 83 unique individuals recorded using land (all months, all years)"))
 unique((land$year))
 ```
@@ -45,4 +50,22 @@ table(duplicated(tt, fromLast=F)) #Test if you have duplicated data
 print(paste("No data points are duplicated"))
 ```
 
+```{r}
+library(adehabitatLT)
+library(lubridate)
+library(dplyr)
+
+traj.pb<-as.ltraj(xy=ows[,c("X","Y")], date=ows$datetime, id=as.character(ows$animal))
+traj2.pb<-ld(traj)
+summary(traj.pb)
+
+
+
+```
+
+```{r}
+# Graph Speed before cleaning data
+hist(traj.pb2$dist,xlab="Speed",main="Speed distribution - PB")
+plot(traj.pb2$dist,type="p",xlab="Index",ylab="Speed",main="Overall Speed distribution - PB",cex=.5)
+```
 

@@ -65,3 +65,92 @@ for(i in 1:length(ID.all)){
   points(temp2,pch=".",cex=4,col=i)
 }
 
+# Show data on top of imagery to help understand context
+e <- extent(min(ele$Long),max(ele$Long), min(ele$Lat), max(ele$Lat))
+r = gmap(e,type='satellite',zoom=7,lonlat=TRUE)
+plot(r)
+
+xy <- ele[c("Long","Lat")]
+proj.info <- "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+points(xy,pch=".",cex=4,col=i)
+
+####################################################################
+##### TRAJECTORY ANALYSES #########################################
+###################################################################
+
+# Create a matrix to use to project data
+# *************************************
+temp <-as.matrix(cbind(ele$Long,ele$Lat))
+
+# Set the projection and project data writing to new dataframe xy
+proj.info <- paste("+proj=utm +zone=",36," +units=m +datum=WGS84",sep="")
+xy <-project(temp,proj.info)
+
+X <-xy[,1]
+Y <-xy[,2]
+
+# Bind these data to the dataset
+temp <-cbind(ele,X,Y)
+xy <-temp[,c("X","Y")]
+
+# Calculate animal trajectories
+# Convert point data to trajectory
+temp.traj <-as.ltraj(xy,temp$Date,id = temp$ID, typeII = TRUE, slsp = c("remove"))
+summary(temp.traj)
+
+# The problem with above, is that it doesn't account for positions (fixes) that weren't collected (NA values not included).  Would make it seem like all the data were collected
+# To fix, use the timing of collection to obtain a regular trajectory, based on a reference date.
+start.ele <- paste("2016-05-16","10:00:00",sep=" ")
+refda <- strptime(start.ele, "%Y-%m-%d %H:%M:%S", tz="Africa/Nairobi")
+temp.traj <- setNA(temp.traj, refda, 30, units = "min")
+
+# Now, create trajectory, but keep the info
+traj <- as.ltraj(xy,date = temp$Date, id = temp$ID, infolocs = temp[,2:8], typeII = TRUE, slsp = c("remove"))
+
+# Set NAs in trajectory
+traj2 <- setNA(traj, refda, 30, units = "min")
+
+# Convert to a dataframe using the ld command
+traj.ele <-ld(traj2)
+
+#the dist column provides a metric of ground speed that can be used to remove erroneous high speed movements
+summary(traj.ele$dist)
+# Graph Speed before cleaning data
+hist(traj.ele$dist,xlab="Speed",main="Speed distribution - Elephants")
+plot(traj.ele$dist,type="p",xlab="Index",ylab="Speed",main="Overall Speed distribution - Elephants",cex=.5)
+
+#If we have really high speeds, need to remove and then reprocess.
+traj.ele <- traj.ele[which(traj.ele$dist < 5000),] # This will be specific to animal.  This is seemingly a reaonsable cut-off for 30 min data.
+nrow(traj.ele)
+
+# Graph Speed after cleaning data
+hist(traj.ele$dist,xlab="Speed",main="Speed distribution")
+plot(traj.ele$dist,type="p",xlab="Index",ylab="Speed",main="Overall Speed distribution",cex=.5)
+nrow(traj.ele)
+
+# In removing high speed values, also removed NAs, so we need to add them back in
+# Convert point data to trajectory
+xy <-traj.ele[,c("x","y")]
+temp.traj <-as.ltraj(xy,traj.ele$date,id = traj.ele$id, typeII = TRUE, slsp = c("remove"))
+summary(temp.traj)
+
+# Use the timing of collection to obtain a regular trajectory, based on a reference date.
+temp.traj <- setNA(temp.traj, refda, 30, units = "min")
+
+# Summarize
+Summary.traj2 <- summary(temp.traj)
+
+
+
+# Convert to a dataframe using the ld command
+traj.ele <-ld(temp.traj)
+
+# Considering# Plot the trajectories and look at them
+par(mfrow=c(1,1)) #Adjusts margins so large enough to contain info
+plot(traj2) # View all
+plot(traj2[2]) # Or just 1 of the elephants.  Some very interesting patterns there.
+
+# Plotting function used with the adehabitat trajectory information
+par(mar = rep(2, 4))  #Adjusts margins so large enough to contain info
+plotltr(traj2, "DOP") # Graphic of DOP over time......these should all be < 5, since we've cleaned them above.  Anything noticeable in the pattern?
+plotltr(traj2,"dt/60") # Show when data were collected...should be every 30 minutes.
