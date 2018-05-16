@@ -52,7 +52,6 @@ library(lubridate)
 library(dplyr)
 
 traj.pb<-as.ltraj(xy=ows[,c("X","Y")], date=ows$datetime, id=as.character(ows$animal))
-traj2.pb<-ld(traj)
 summary(traj.pb)
 
 

@@ -4,13 +4,14 @@ author: "Annie Kellner"
 date: "May 8, 2018"
 output: html_document
 ---
-```{r echo=FALSE} 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
 rm(list = ls())
 land <- read.csv("Land.csv")
 ```
 #All land
 
-83 unique individuals use land from 2004-2016. If all months are included, all years are represented.  
+83 unique individuals use land from 2004-2016. If all months are included (not just open water season), all years are represented.  
 
 Number of data points per animal, per year (all months included):
 
@@ -34,48 +35,71 @@ Total number data points 'all land'| Total number data points 'OWS'
 -----------------------------------|------------------------------
 `r nrow(land)`                     | `r nrow(ows)`  
 
+```{r echo=FALSE}
+library(adehabitatLT)
+library(lubridate)
+library(knitr)
+library(kableExtra)
+
+ows <- subset(land, land$month > 6 & land$month < 11)
+ows$datetime <- ymd_hms(paste(ows$year, ows$month, ows$day, ows$hour, ows$minute, ows$second, sep = "-"), tz="US/Alaska") #use lubridate fxn to format datetime, add column to land dataframe
 
 
+traj.pb<-as.ltraj(xy=ows[,c("X","Y")], date=ows$datetime, id=as.character(ows$animal))
+Summary.traj.pb <- summary(traj.pb)
+Summary.traj.pb$DaysTrack <-round(difftime(Summary.traj.pb$date.end,Summary.traj.pb$date.begin, units="days"),digits=1)
+Summary.traj.pb$Records <- Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs
+Summary.traj.pb$PctComplete <- round((Summary.traj.pb$nb.reloc-Summary.traj.pb$NAs)/Summary.traj.pb$nb.reloc*100,digits=1)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+#Make table prettier
+Summary.traj.pb %>%
+  kable("html") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
 ```
+Next steps:  
+  * See how well date.begin dates match up with first land point (test some %?)  
+    + Atwood 2016: earliest date July 22, 2000; latest Aug 6, 1993  
+                   earliest departure Aug 14, 1993; latest departure Nov. 7, 2013  
+  * Identify first land points  
+  * Can see 2013 bears are still on land October 31 --> extend the season for this year  
+  * Check into other years: 2006, 2008, 2012, 2013, 2014 (some late stays might reflect         denning --> would not count)
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+  
+```{r echo=FALSE}
+traj.pb2<-ld(traj.pb)
+summary(traj.pb2$dist)
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+  
+  *Need to place missing values in trajectories  
+    + Do this by year? Need to read more about this.
+  
+```{r echo=FALSE}
+hist(traj.pb2$dist,xlab="Speed",main="Speed distribution - PB")
 ```
+```{r}
+plot(traj.pb2$dist,type="p",xlab="Index",ylab="Speed",main="Overall Speed distribution - PB",cex=.5)
+```
+* default = m?  
+* Looked into two outliers --> definitely not correct  
+* Need to look into biologically plausible distances for PB. Also take into account variability in interval between fixes.
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

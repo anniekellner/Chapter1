@@ -26,6 +26,8 @@ library(lubridate)
 setwd("C:/Users/akell/Desktop/Spring_2018/Research/GIS/Chapter1")
 land<- read.csv("Land.csv")
 
+
+
 #set tz to US/Alaska
 
 
@@ -84,6 +86,9 @@ plot(traj.pb$dist,type="p",xlab="Index",ylab="Speed",main="Overall Speed distrib
 traj.pb.outliers <- traj.pb[which(traj.pb$dist > 250000),]
 
 Summary.traj.pb <- summary(traj.pb)
+
+write.csv(Summary.traj.pb, file="traj_summary.csv") #write to .csv for landing analysis
+
 
 # Summarize the completeness of the dataset that will allow you to pull these results out in a table
 Summary.traj.pb$DaysTrack <-round(difftime(Summary.traj.pb$date.end,Summary.traj.pb$date.begin, units="days"),digits=1)
